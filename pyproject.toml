@@ -1,27 +1,34 @@
 [project]
 name = "learnspaceproject"
 version = "0.1.0"
-description = ""
+description = "LearnSpace Educational Platform"
 authors = [
-    {name = "Your Name",email = "you@example.com"}
+    {name = "Andrey Sapeshko",email = "andrdd17@gmail.com"}
 ]
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "django-environ (>=0.12.0,<0.13.0) ; python_version >= \"3.13\" and python_version < \"4\"",
     "django (>=5.2.7,<6.0.0)",
-    "djangorestframework (>=3.16.1,<4.0.0)"
+    "djangorestframework (>=3.16.1,<4.0.0)",
+    "pillow (>=12.0.0,<13.0.0)",
+    "psycopg2-binary (>=2.9.11,<3.0.0)"
 ]
 
+[tool.poetry]
+package-mode = false
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.poetry.group.lint.dependencies]
-flake8 = "^7.3.0"
-mypy = "^1.18.2"
-black = "^25.9.0"
-isort = "^7.0.0"
+[dependency-groups]
+dev = [
+    "flake8 (>=7.3.0,<8.0.0)",
+    "mypy (>=1.18.2,<2.0.0)",
+    "black (>=25.9.0,<26.0.0)",
+    "isort (>=7.0.0,<8.0.0)"
+]
 
 [tool.mypy]
 disallow_untyped_defs = true
@@ -30,26 +37,21 @@ warn_return_any = true
 exclude = 'venv'
 
 [tool.black]
-# Максимальная длина строки
 line-length = 119
-# Файлы, которые не нужно форматировать
 exclude = '''
 (
   /(
-      \.eggs         # Исключить несколько общих каталогов
-    | \.git          # в корне проекта
+      \.eggs
+    | \.git
     | \.hg
     | \.mypy_cache
     | \.tox
     | \.venv
     | dist
   )/
-  | foo.py           # Также отдельно исключить файл с именем foo.py
-                     # в корне проекта
+  | foo.py
 )
 '''
 
 [tool.isort]
-# максимальная длина строки
 line_length = 119
-
