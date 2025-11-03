@@ -60,3 +60,10 @@ class Payments(models.Model):
         verbose_name='Способ оплаты'
     )
 
+    def __str__(self):
+        return f'{self.payment_date}: {self.amount} за {self.lesson if self.lesson else self.course}'
+
+    class Meta:
+        verbose_name = 'оплата'
+        verbose_name_plural = 'оплаты'
+        ordering = ['-payment_date']

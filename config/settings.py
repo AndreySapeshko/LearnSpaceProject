@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "courses",
     "users",
     "api",
+    "django_filters",
 ]
 
 MIDDLEWARE = [
@@ -108,6 +109,12 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 AUTH_USER_MODEL = 'users.CustomUser'
+
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': (
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ),
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
