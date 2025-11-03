@@ -29,10 +29,29 @@ class Payments(models.Model):
         ('cash', 'Наличные'),
         ('transfer', 'Перевод на счет')
     ]
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='payments')
+    user = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='payments',
+        verbose_name='Пользователь'
+    )
     payment_date = models.DateField(verbose_name='Дата оплаты')
-    course = models.OneToOneField('courses.Course', on_delete=models.CASCADE)
-    lesson = models.OneToOneField('courses.Lesson', on_delete=models.CASCADE)
+    course = models.ForeignKey(
+        'courses.Course',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='payments',
+        verbose_name='Курс'
+    )
+    lesson = models.ForeignKey(
+        'courses.Lesson',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='payments',
+        verbose_name='Урок'
+    )
     amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Сумма оплаты')
     payment_method = models.CharField(
         max_length=20,

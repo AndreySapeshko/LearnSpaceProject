@@ -8,16 +8,16 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         users = [
             {
-                'email': 'user_one1@example.com', 'password': 'user_one1',
-                'phone_number':'123456789', 'country': 'Russia'
+                'email': 'user_four4@example.com', 'password': 'user_four4',
+                'phone_number':'456123789', 'country': 'Russia'
             },
             {
-                'email': 'user_two2@example.com', 'password': 'user_two2',
-                'phone_number': '987654321', 'country': 'USA'
+                'email': 'user_five5@example.com', 'password': 'user_five5',
+                'phone_number': '654987321', 'country': 'USA'
             },
             {
-                'email': 'user_three3@example.com', 'password': 'user_three3',
-                'phone_number': '321654987', 'country': 'Canada'
+                'email': 'user_six6@example.com', 'password': 'user_six6',
+                'phone_number': '987321654', 'country': 'Canada'
             }
         ]
 
