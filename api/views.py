@@ -5,7 +5,7 @@ from rest_framework import viewsets, generics
 from django.views.decorators.csrf import csrf_exempt
 from courses.models import Course, Lesson
 from users.models import Payments
-from users.permissions import IsModerator
+from users.permissions import IsModerator, IsOwner
 from .serializers import CourseSerializer, LessonSerializer, PaymentsSerializer
 
 
@@ -13,13 +13,17 @@ class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
 
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
     def get_permissions(self):
         if self.action in ['list', 'retrieve', 'update']:
-            permission_classes = [IsModerator]
+            permission_classes = [IsModerator | IsOwner]
+        elif self.action == 'destroy':
+            permission_classes = [IsOwner]
         return [permission() for permission in permission_classes]
 
 
-# @csrf_exempt
 class LessonCreateAPIView(generics.CreateAPIView):
     serializer_class = LessonSerializer
 
@@ -27,24 +31,25 @@ class LessonCreateAPIView(generics.CreateAPIView):
 class LessonListAPIView(generics.ListAPIView):
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
-    permission_classes = [IsModerator]
+    permission_classes = [IsModerator | IsOwner]
 
 
 class LessonRetrieveAPIView(generics.RetrieveAPIView):
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
-    permission_classes = [IsModerator]
+    permission_classes = [IsModerator | IsOwner]
 
 
 class LessonUpdateAPIView(generics.UpdateAPIView):
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
-    permission_classes = [IsModerator]
+    permission_classes = [IsModerator | IsOwner]
 
 
 class LessonDestroyAPIView(generics.DestroyAPIView):
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
+    permission_classes = [IsOwner]
 
 
 class PaymentsListAPIView(generics.ListAPIView):
