@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+
 class CustomUser(AbstractUser):
     """ Класс описывающий модель пользователя """
 
@@ -19,3 +20,50 @@ class CustomUser(AbstractUser):
     class Meta:
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
+
+
+class Payments(models.Model):
+    """ Класс описывающий модель платежи """
+
+    PAYMENT_METHOD_CHOICES = [
+        ('cash', 'Наличные'),
+        ('transfer', 'Перевод на счет')
+    ]
+    user = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='payments',
+        verbose_name='Пользователь'
+    )
+    payment_date = models.DateField(verbose_name='Дата оплаты')
+    course = models.ForeignKey(
+        'courses.Course',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='payments',
+        verbose_name='Курс'
+    )
+    lesson = models.ForeignKey(
+        'courses.Lesson',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='payments',
+        verbose_name='Урок'
+    )
+    amount = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='Сумма оплаты')
+    payment_method = models.CharField(
+        max_length=20,
+        choices=PAYMENT_METHOD_CHOICES,
+        default='transfer',
+        verbose_name='Способ оплаты'
+    )
+
+    def __str__(self):
+        return f'{self.payment_date}: {self.amount} за {self.lesson if self.lesson else self.course}'
+
+    class Meta:
+        verbose_name = 'оплата'
+        verbose_name_plural = 'оплаты'
+        ordering = ['-payment_date']
