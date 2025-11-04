@@ -1,4 +1,5 @@
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.decorators import permission_classes
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework import viewsets, generics
 from django.views.decorators.csrf import csrf_exempt
@@ -11,6 +12,12 @@ from .serializers import CourseSerializer, LessonSerializer, PaymentsSerializer
 class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
+
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve', 'update']:
+            permission_classes = [IsModerator]
+        return [permission() for permission in permission_classes]
+
 
 # @csrf_exempt
 class LessonCreateAPIView(generics.CreateAPIView):
