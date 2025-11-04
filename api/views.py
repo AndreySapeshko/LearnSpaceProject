@@ -4,6 +4,7 @@ from rest_framework import viewsets, generics
 from django.views.decorators.csrf import csrf_exempt
 from courses.models import Course, Lesson
 from users.models import Payments
+from users.permissions import IsModerator
 from .serializers import CourseSerializer, LessonSerializer, PaymentsSerializer
 
 
@@ -19,16 +20,19 @@ class LessonCreateAPIView(generics.CreateAPIView):
 class LessonListAPIView(generics.ListAPIView):
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
+    permission_classes = [IsModerator]
 
 
 class LessonRetrieveAPIView(generics.RetrieveAPIView):
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
+    permission_classes = [IsModerator]
 
 
 class LessonUpdateAPIView(generics.UpdateAPIView):
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
+    permission_classes = [IsModerator]
 
 
 class LessonDestroyAPIView(generics.DestroyAPIView):
