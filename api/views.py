@@ -17,21 +17,23 @@ class CourseViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
     def get_permissions(self):
-        if self.action in ['list', 'retrieve', 'update']:
+        if self.action in ['retrieve', 'update']:
             permission_classes = [IsModerator | IsOwner]
         elif self.action == 'destroy':
             permission_classes = [IsOwner]
+        elif self.action == 'create':
+            permission_classes = [~IsModerator]
         return [permission() for permission in permission_classes]
 
 
 class LessonCreateAPIView(generics.CreateAPIView):
     serializer_class = LessonSerializer
+    permission_classes = [~IsModerator]
 
 
 class LessonListAPIView(generics.ListAPIView):
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
-    permission_classes = [IsModerator | IsOwner]
 
 
 class LessonRetrieveAPIView(generics.RetrieveAPIView):
