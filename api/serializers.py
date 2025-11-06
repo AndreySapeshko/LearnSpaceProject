@@ -1,12 +1,17 @@
 from rest_framework import serializers
 from courses.models import Course, Lesson
 from users.models import Payments
+from .validators import LinksTrustedSitesValidator
 
 
 class LessonSerializer(serializers.ModelSerializer):
+
+
     class Meta:
         model = Lesson
         fields = '__all__'
+        trusted_sites = ['https://www.youtube.com/', 'https://vimeo.com/']
+        validators = [LinksTrustedSitesValidator(field='video_url', trusted_sites=trusted_sites)]
 
 
 class CourseSerializer(serializers.ModelSerializer):
