@@ -55,7 +55,7 @@ class Lesson(models.Model):
         Course,
         on_delete=models.CASCADE,
         related_name='lessons',
-        verbose_name='Автор курса'
+        verbose_name='Курс'
     )
 
     def __str__(self):
