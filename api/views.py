@@ -17,7 +17,7 @@ class CourseViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
     def get_permissions(self):
-        if self.action in ['retrieve', 'update']:
+        if self.action in ['retrieve', 'update', 'partial_update']:
             permission_classes = [IsModerator | IsOwner]
         elif self.action == 'destroy':
             permission_classes = [IsOwner]
