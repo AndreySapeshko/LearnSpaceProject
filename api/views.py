@@ -1,12 +1,13 @@
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.response import Response
 from rest_framework.decorators import permission_classes
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework import viewsets, generics
 from django.views.decorators.csrf import csrf_exempt
-from courses.models import Course, Lesson
+from courses.models import Course, Lesson, Subscription
 from users.models import Payments
 from users.permissions import IsModerator, IsOwner
-from .serializers import CourseSerializer, LessonSerializer, PaymentsSerializer
+from .serializers import CourseSerializer, LessonSerializer, PaymentsSerializer, SubscriptionSerializer
 
 
 class CourseViewSet(viewsets.ModelViewSet):
@@ -60,3 +61,22 @@ class PaymentsListAPIView(generics.ListAPIView):
     filter_backends = [DjangoFilterBackend, OrderingFilter]
     filterset_fields = ['course', 'lesson', 'payment_method']
     ordering_fields = ['payment_date']
+
+
+class SubscriptionAPIView(generics.CreateAPIView):
+    serializer_class = SubscriptionSerializer
+    # queryset = Subscription.ogjects.all()
+
+    def post(self, request, *args, **kwargs):
+        user = self.request.user
+        course_id = self.kwargs.get('pk')
+        course = Course.objects.get(id=course_id)
+        subs_item, created = Subscription.objects.get_or_create(user=user, course=course)
+        if created:
+            message = 'подписка добавлена'
+        else:
+            subs_item.delete()
+            message = 'подписка удалена'
+
+        return Response({'message': message})
+

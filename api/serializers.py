@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from courses.models import Course, Lesson
+from courses.models import Course, Lesson, Subscription
 from users.models import Payments
 from .validators import LinksTrustedSitesValidator
 
@@ -14,16 +14,28 @@ class LessonSerializer(serializers.ModelSerializer):
         validators = [LinksTrustedSitesValidator(field='video_url', trusted_sites=trusted_sites)]
 
 
+class SubscriptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Subscription
+        fields = '__all__'
+
+
 class CourseSerializer(serializers.ModelSerializer):
     lessons = LessonSerializer(many=True, read_only=True)
     count_lessons = serializers.SerializerMethodField()
+    subs = serializers.SerializerMethodField()
+
+    def get_subs(self, obj):
+        if Subscription.objects.filter(user=obj.user, course=obj).first():
+            return True
+        return False
 
     def get_count_lessons(self, obj):
         return Lesson.objects.filter(course=obj.id).count()
 
     class Meta:
         model = Course
-        fields = ['name', 'description', 'preview', 'count_lessons', 'lessons']
+        fields = ['name', 'description', 'preview', 'count_lessons', 'lessons', 'subs']
 
 
 class PaymentsSerializer(serializers.ModelSerializer):
