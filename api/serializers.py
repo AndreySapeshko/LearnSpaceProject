@@ -11,7 +11,7 @@ class LessonSerializer(serializers.ModelSerializer):
         model = Lesson
         fields = '__all__'
         trusted_sites = ['https://www.youtube.com/', 'https://vimeo.com/']
-        validators = [LinksTrustedSitesValidator(field='video_url', trusted_sites=trusted_sites)]
+        validators = [LinksTrustedSitesValidator(trusted_sites=trusted_sites)]
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
@@ -26,9 +26,8 @@ class CourseSerializer(serializers.ModelSerializer):
     subs = serializers.SerializerMethodField()
 
     def get_subs(self, obj):
-        if Subscription.objects.filter(user=obj.user, course=obj).first():
-            return True
-        return False
+        user = self.context['request'].user
+        return Subscription.objects.filter(user=user, course=obj).exists()
 
     def get_count_lessons(self, obj):
         return Lesson.objects.filter(course=obj.id).count()

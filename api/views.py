@@ -1,4 +1,5 @@
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import permission_classes
 from rest_framework.filters import SearchFilter, OrderingFilter
@@ -7,14 +8,14 @@ from django.views.decorators.csrf import csrf_exempt
 from courses.models import Course, Lesson, Subscription
 from users.models import Payments
 from users.permissions import IsModerator, IsOwner
-from .paginators import LessonsPagination, CoursesPagination
+from .paginators import ContentPagination
 from .serializers import CourseSerializer, LessonSerializer, PaymentsSerializer, SubscriptionSerializer
 
 
 class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
-    pagination_class = CoursesPagination
+    pagination_class = ContentPagination
 
     def get(self, request):
         queryset = Course.objects.all()
@@ -32,6 +33,8 @@ class CourseViewSet(viewsets.ModelViewSet):
             permission_classes = [IsOwner]
         elif self.action == 'create':
             permission_classes = [~IsModerator]
+        else:
+            permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
 
 
@@ -43,7 +46,7 @@ class LessonCreateAPIView(generics.CreateAPIView):
 class LessonListAPIView(generics.ListAPIView):
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
-    pagination_class = LessonsPagination
+    pagination_class = ContentPagination
 
     def get(self, request):
         queryset = Lesson.objects.all()
