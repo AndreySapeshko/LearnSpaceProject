@@ -13,6 +13,8 @@ from .serializers import CourseSerializer, LessonSerializer, PaymentsSerializer,
 
 
 class CourseViewSet(viewsets.ModelViewSet):
+    """ Класс для создания, просмотра, редактирования и удаления курса """
+
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
     pagination_class = ContentPagination
