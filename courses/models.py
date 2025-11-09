@@ -10,6 +10,7 @@ class Course(models.Model):
 
     name = models.CharField(max_length=100, verbose_name='Название курса')
     description = models.CharField(max_length=300, verbose_name='Описание')
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=1000, verbose_name='Цена')
     preview = models.ImageField(
         upload_to='images/',
         blank=True,
