@@ -1,18 +1,24 @@
+from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import permission_classes
 from rest_framework.filters import SearchFilter, OrderingFilter
-from rest_framework import viewsets, generics
+from rest_framework import viewsets, generics, status
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework.views import APIView
+
 from courses.models import Course, Lesson, Subscription
 from users.models import Payments
 from users.permissions import IsModerator, IsOwner
 from .paginators import ContentPagination
 from .serializers import CourseSerializer, LessonSerializer, PaymentsSerializer, SubscriptionSerializer
+from .servises import create_stripe_price, create_stripe_session
 
 
 class CourseViewSet(viewsets.ModelViewSet):
+    """ Класс для создания, просмотра, редактирования и удаления курса """
+
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
     pagination_class = ContentPagination
@@ -98,3 +104,36 @@ class SubscriptionAPIView(generics.CreateAPIView):
 
         return Response({'message': message})
 
+
+class PaymentCreateAPIView(generics.CreateAPIView):
+    serializer_class = PaymentsSerializer
+
+    def create(self, request, *args, **kwargs):
+        try:
+            course_id = self.kwargs.get('pk')
+            course = get_object_or_404(Course, id=course_id)
+
+            stripe_price = create_stripe_price(course)
+            session_id, link = create_stripe_session(stripe_price)
+
+            payment = Payments.objects.create(
+                user=request.user,
+                course=course,
+                amount=course.price,
+                payment_method='transfer',
+                session_id=session_id,
+                link=link
+            )
+
+            return Response({
+                'payment_id': payment.id,
+                'session_id': session_id,
+                'checkout_url': link,
+                'message': 'Payment session created successfully'
+            }, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            return Response(
+                {'error': f'Payment creation failed: {str(e)}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
