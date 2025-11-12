@@ -14,6 +14,7 @@ from users.permissions import IsModerator, IsOwner
 from .paginators import ContentPagination
 from .serializers import CourseSerializer, LessonSerializer, PaymentsSerializer, SubscriptionSerializer
 from .servises import create_stripe_price, create_stripe_session
+from courses.tasks import course_update_notice
 
 
 class CourseViewSet(viewsets.ModelViewSet):
@@ -48,6 +49,16 @@ class LessonCreateAPIView(generics.CreateAPIView):
     serializer_class = LessonSerializer
     permission_classes = [~IsModerator]
 
+    def perform_create(self, serializer):
+        lesson = serializer.save()
+        course = lesson.course
+        payments = course.payments.all()
+        users_email = []
+        for payment in payments:
+            if payment.user.email not in users_email:
+                users_email.append(payment.user.email)
+        course_update_notice.delay(course_id=course.id, users_email=users_email)
+
 
 class LessonListAPIView(generics.ListAPIView):
     serializer_class = LessonSerializer
@@ -71,6 +82,16 @@ class LessonUpdateAPIView(generics.UpdateAPIView):
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
     permission_classes = [IsModerator | IsOwner]
+
+    def perform_update(self, serializer):
+        lesson = serializer.save()
+        course = lesson.course
+        payments = course.payments.all()
+        users_email = []
+        for payment in payments:
+            if payment.user.email not in users_email:
+                users_email.append(payment.user.email)
+        course_update_notice.delay(course_id=course.id, users_email=users_email)
 
 
 class LessonDestroyAPIView(generics.DestroyAPIView):

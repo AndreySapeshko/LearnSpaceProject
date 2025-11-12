@@ -139,10 +139,10 @@ CACHES = {
 # Настройки для Celery
 
 # URL-адрес брокера сообщений
-CELERY_BROKER_URL = f'redis://{REDIS_HOST}:{REDIS_PORT}'
+CELERY_BROKER_URL = 'redis://localhost:6379/0' # f'redis://{REDIS_HOST}:{REDIS_PORT}'
 
 # URL-адрес брокера результатов, также Redis
-CELERY_RESULT_BACKEND = f'redis://{REDIS_HOST}:{REDIS_PORT}'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0' # f'redis://{REDIS_HOST}:{REDIS_PORT}'
 
 # Часовой пояс для работы Celery
 CELERY_TIMEZONE = "Europe/Moscow"

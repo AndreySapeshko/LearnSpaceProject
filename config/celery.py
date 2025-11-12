@@ -1,9 +1,10 @@
 from __future__ import absolute_import, unicode_literals
+
 import os
 from celery import Celery
 
 # Установка переменной окружения для настроек проекта
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'learn_space_project.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 
 # Создание экземпляра объекта Celery
 app = Celery('config')
