@@ -146,12 +146,15 @@ CELERY_RESULT_BACKEND = 'redis://localhost:6379/0' # f'redis://{REDIS_HOST}:{RED
 
 # Часовой пояс для работы Celery
 CELERY_TIMEZONE = "Europe/Moscow"
+CELERY_ENABLE_UTC = False
 
 # Флаг отслеживания выполнения задач
 CELERY_TASK_TRACK_STARTED = True
 
 # Максимальное время на выполнение задачи
 CELERY_TASK_TIME_LIMIT = 30 * 60
+
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),

@@ -12,5 +12,7 @@ app = Celery('config')
 # Загрузка настроек из файла Django
 app.config_from_object('django.conf:settings', namespace='CELERY')
 
+app.conf.beat_scheduler = 'django_celery_beat.schedulers:DatabaseScheduler'
+
 # Автоматическое обнаружение и регистрация задач из файлов tasks.py в приложениях Django
 app.autodiscover_tasks()

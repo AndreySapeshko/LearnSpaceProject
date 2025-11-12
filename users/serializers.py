@@ -9,7 +9,7 @@ class UserSerializer(ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'password', 'avatar', 'phone_number', 'country', 'is_active', 'groups']
+        fields = ['id', 'email', 'password', 'avatar', 'phone_number', 'country', 'is_active', 'groups', 'last_login']
 
     def create(self, validated_data):
         """Создает пользователя с правильно хешированным паролем"""
