@@ -30,7 +30,7 @@ def remove_inactive_users():
     users = User.objects.filter(is_active=True)
     thirty_days_ago = timezone.now() - timedelta(days=30)
     for user in users:
-        if user.last_login < thirty_days_ago:
+        if user.last_login and user.last_login < thirty_days_ago:
             user.is_active = False
             user.save()
 
