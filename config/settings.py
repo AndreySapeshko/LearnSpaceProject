@@ -189,3 +189,12 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 STRIPE_PUBLISHABLE_KEY = env('STRIPE_PUBLISHABLE_KEY', default='pk_test_...')
 STRIPE_SECRET_KEY = env('STRIPE_SECRET_KEY', default='sk_test_...')
 STRIPE_WEBHOOK_SECRET = env('STRIPE_WEBHOOK_SECRET', default='whsec_...')
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.yandex.ru'
+EMAIL_PORT = 587
+EMAIL_USE_SSL = False
+EMAIL_USE_TLS = True
+
+EMAIL_HOST_USER = env('YANDEX_EMAIL')
+EMAIL_HOST_PASSWORD = env('YANDEX_EMAIL_PASSWORD')
