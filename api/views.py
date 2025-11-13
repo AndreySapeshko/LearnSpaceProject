@@ -33,6 +33,10 @@ class CourseViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+    def perform_update(self, serializer):
+        course = serializer.save()
+        course_update_notice.delay(course_id=course.id)
+
     def get_permissions(self):
         if self.action in ['retrieve', 'update', 'partial_update']:
             permission_classes = [IsModerator | IsOwner]
@@ -52,12 +56,7 @@ class LessonCreateAPIView(generics.CreateAPIView):
     def perform_create(self, serializer):
         lesson = serializer.save()
         course = lesson.course
-        payments = course.payments.all()
-        users_email = []
-        for payment in payments:
-            if payment.user.email not in users_email:
-                users_email.append(payment.user.email)
-        course_update_notice.delay(course_id=course.id, users_email=users_email)
+        course_update_notice.delay(course_id=course.id)
 
 
 class LessonListAPIView(generics.ListAPIView):
@@ -86,12 +85,7 @@ class LessonUpdateAPIView(generics.UpdateAPIView):
     def perform_update(self, serializer):
         lesson = serializer.save()
         course = lesson.course
-        payments = course.payments.all()
-        users_email = []
-        for payment in payments:
-            if payment.user.email not in users_email:
-                users_email.append(payment.user.email)
-        course_update_notice.delay(course_id=course.id, users_email=users_email)
+        course_update_notice.delay(course_id=course.id)
 
 
 class LessonDestroyAPIView(generics.DestroyAPIView):
