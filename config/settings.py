@@ -15,7 +15,6 @@ import environ
 from datetime import timedelta
 from pathlib import Path
 
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -200,7 +199,7 @@ STRIPE_PUBLISHABLE_KEY = env('STRIPE_PUBLISHABLE_KEY', default='pk_test_...')
 STRIPE_SECRET_KEY = env('STRIPE_SECRET_KEY', default='sk_test_...')
 STRIPE_WEBHOOK_SECRET = env('STRIPE_WEBHOOK_SECRET', default='whsec_...')
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_HOST = 'smtp.yandex.ru'
 EMAIL_PORT = 587
 EMAIL_USE_SSL = False
@@ -208,3 +207,80 @@ EMAIL_USE_TLS = True
 
 EMAIL_HOST_USER = env('YANDEX_EMAIL')
 EMAIL_HOST_PASSWORD = env('YANDEX_EMAIL_PASSWORD')
+
+LOG_DIR = Path(BASE_DIR) / "logs"
+os.makedirs(LOG_DIR, exist_ok=True)
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "[{asctime}] [{levelname}] {name}: {message}",
+            "style": "{",
+        },
+        "simple": {
+            "format": "{levelname} {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+        'file_all': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': LOG_DIR / 'django.log',
+            'maxBytes': 1024 * 1024 * 10,  # 10 MB
+            'backupCount': 5,
+            'formatter': 'detailed',
+        },
+        'file_errors': {
+            'level': 'ERROR',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': LOG_DIR / 'errors.log',
+            'maxBytes': 1024 * 1024 * 10,
+            'backupCount': 5,
+            'formatter': 'detailed',
+        },
+    },
+    "root": {  # всё, у чего нет своего логгера
+        "handlers": ["console"],
+        "level": "INFO",
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console", "file_all", "file_errors"],
+            "level": "INFO",
+            "propagate": True,
+        },
+        "courses": {
+            "handlers": ["console", "file_all", "file_errors"],
+            "level": "INFO",
+            "propagate": True,
+        },
+        "api": {
+            "handlers": ["console", "file_all", "file_errors"],
+            "level": "INFO",
+            "propagate": True,
+        },
+        "users": {
+            "handlers": ["console", "file_all", "file_errors"],
+            "level": "INFO",
+            "propagate": True,
+        },
+        "celery": {
+            "handlers": ["console", "file_all", "file_errors"],
+            "level": "INFO",
+            "propagate": True,
+        },
+        # если хочешь отладку запросов к БД:
+        # "django.db.backends": {
+        #     "handlers": ["console"],
+        #     "level": "WARNING",
+        #     "propagate": False,
+        # },
+    },
+}

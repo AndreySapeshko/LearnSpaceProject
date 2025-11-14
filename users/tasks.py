@@ -1,9 +1,13 @@
+import logging
+
 from celery import shared_task
 from django.utils import timezone
 from datetime import timedelta
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
+
+logger = logging.getLogger('users')
 
 
 @shared_task
@@ -17,8 +21,7 @@ def remove_inactive_users():
         last_login__lt=thirty_days_ago
     )
 
-    count = inactive_users.count()
-    inactive_users.update(is_active=False)
+    count = inactive_users.update(is_active=False)
 
-    print(f"Deactivated {count} inactive users")
+    logger.info(f"Deactivated {count} inactive users")
     return f"Deactivated {count} users"
