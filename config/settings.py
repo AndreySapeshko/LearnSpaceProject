@@ -15,7 +15,6 @@ import environ
 from datetime import timedelta
 from pathlib import Path
 
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -48,6 +47,7 @@ INSTALLED_APPS = [
     "django_filters",
     "rest_framework_simplejwt",
     "drf_yasg",
+    "django_celery_beat",
 ]
 
 MIDDLEWARE = [
@@ -125,6 +125,43 @@ REST_FRAMEWORK = {
     ],
 }
 
+REDIS_HOST = env("REDIS_HOST", default='localhost')
+REDIS_PORT = env("REDIS_PORT", default=6379)
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': f'redis://{REDIS_HOST}:{REDIS_PORT}/1',
+    }
+}
+
+# Настройки для Celery
+
+# URL-адрес брокера сообщений
+CELERY_BROKER_URL = f'redis://{REDIS_HOST}:{REDIS_PORT}'
+
+# URL-адрес брокера результатов, также Redis
+CELERY_RESULT_BACKEND = f'redis://{REDIS_HOST}:{REDIS_PORT}'
+
+# Часовой пояс для работы Celery
+CELERY_TIMEZONE = "Europe/Moscow"
+CELERY_ENABLE_UTC = False
+
+# Флаг отслеживания выполнения задач
+CELERY_TASK_TRACK_STARTED = True
+
+# Максимальное время на выполнение задачи
+CELERY_TASK_TIME_LIMIT = 30 * 60
+
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+
+CELERY_BEAT_SCHEDULE = {
+    'Remove inactive users': {
+        'task': 'users.tasks.remove_inactive_users',
+        'schedule': timedelta(days=1),
+    },
+}
+
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
@@ -161,3 +198,89 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 STRIPE_PUBLISHABLE_KEY = env('STRIPE_PUBLISHABLE_KEY', default='pk_test_...')
 STRIPE_SECRET_KEY = env('STRIPE_SECRET_KEY', default='sk_test_...')
 STRIPE_WEBHOOK_SECRET = env('STRIPE_WEBHOOK_SECRET', default='whsec_...')
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_HOST = 'smtp.yandex.ru'
+EMAIL_PORT = 587
+EMAIL_USE_SSL = False
+EMAIL_USE_TLS = True
+
+EMAIL_HOST_USER = env('YANDEX_EMAIL')
+EMAIL_HOST_PASSWORD = env('YANDEX_EMAIL_PASSWORD')
+
+LOG_DIR = Path(BASE_DIR) / "logs"
+os.makedirs(LOG_DIR, exist_ok=True)
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "[{asctime}] [{levelname}] {name}: {message}",
+            "style": "{",
+        },
+        "simple": {
+            "format": "{levelname} {message}",
+            "style": "{",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+        'file_all': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': LOG_DIR / 'django.log',
+            'maxBytes': 1024 * 1024 * 10,  # 10 MB
+            'backupCount': 5,
+            'formatter': 'detailed',
+        },
+        'file_errors': {
+            'level': 'ERROR',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': LOG_DIR / 'errors.log',
+            'maxBytes': 1024 * 1024 * 10,
+            'backupCount': 5,
+            'formatter': 'detailed',
+        },
+    },
+    "root": {  # всё, у чего нет своего логгера
+        "handlers": ["console"],
+        "level": "INFO",
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console", "file_all", "file_errors"],
+            "level": "INFO",
+            "propagate": True,
+        },
+        "courses": {
+            "handlers": ["console", "file_all", "file_errors"],
+            "level": "INFO",
+            "propagate": True,
+        },
+        "api": {
+            "handlers": ["console", "file_all", "file_errors"],
+            "level": "INFO",
+            "propagate": True,
+        },
+        "users": {
+            "handlers": ["console", "file_all", "file_errors"],
+            "level": "INFO",
+            "propagate": True,
+        },
+        "celery": {
+            "handlers": ["console", "file_all", "file_errors"],
+            "level": "INFO",
+            "propagate": True,
+        },
+        # если хочешь отладку запросов к БД:
+        # "django.db.backends": {
+        #     "handlers": ["console"],
+        #     "level": "WARNING",
+        #     "propagate": False,
+        # },
+    },
+}

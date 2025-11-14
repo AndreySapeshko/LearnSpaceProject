@@ -14,6 +14,7 @@ from users.permissions import IsModerator, IsOwner
 from .paginators import ContentPagination
 from .serializers import CourseSerializer, LessonSerializer, PaymentsSerializer, SubscriptionSerializer
 from .servises import create_stripe_price, create_stripe_session
+from courses.tasks import course_update_notice
 
 
 class CourseViewSet(viewsets.ModelViewSet):
@@ -32,6 +33,10 @@ class CourseViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+    def perform_update(self, serializer):
+        course = serializer.save()
+        course_update_notice.delay(course_id=course.id)
+
     def get_permissions(self):
         if self.action in ['retrieve', 'update', 'partial_update']:
             permission_classes = [IsModerator | IsOwner]
@@ -47,6 +52,11 @@ class CourseViewSet(viewsets.ModelViewSet):
 class LessonCreateAPIView(generics.CreateAPIView):
     serializer_class = LessonSerializer
     permission_classes = [~IsModerator]
+
+    def perform_create(self, serializer):
+        lesson = serializer.save()
+        course = lesson.course
+        course_update_notice.delay(course_id=course.id)
 
 
 class LessonListAPIView(generics.ListAPIView):
@@ -71,6 +81,11 @@ class LessonUpdateAPIView(generics.UpdateAPIView):
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
     permission_classes = [IsModerator | IsOwner]
+
+    def perform_update(self, serializer):
+        lesson = serializer.save()
+        course = lesson.course
+        course_update_notice.delay(course_id=course.id)
 
 
 class LessonDestroyAPIView(generics.DestroyAPIView):
