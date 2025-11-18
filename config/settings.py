@@ -88,7 +88,7 @@ DATABASES = {
         'NAME': env('DATABASE_NAME', default='mailings_project'),
         'USER': env('DATABASE_USER', default='postgres'),
         'PASSWORD': env('DATABASE_PASSWORD', default='postgres'),
-        'HOST': env('DATABASE_HOST', default='localhost'),
+        'HOST': env('DATABASE_HOST', default='db'),
         'PORT': env('DATABASE_PORT', default='5432'),
     }
 }
@@ -125,7 +125,7 @@ REST_FRAMEWORK = {
     ],
 }
 
-REDIS_HOST = env("REDIS_HOST", default='localhost')
+REDIS_HOST = env("REDIS_HOST", default='redis')
 REDIS_PORT = env("REDIS_PORT", default=6379)
 
 CACHES = {
@@ -235,7 +235,7 @@ LOGGING = {
             'filename': LOG_DIR / 'django.log',
             'maxBytes': 1024 * 1024 * 10,  # 10 MB
             'backupCount': 5,
-            'formatter': 'detailed',
+            'formatter': 'verbose',
         },
         'file_errors': {
             'level': 'ERROR',
@@ -243,7 +243,7 @@ LOGGING = {
             'filename': LOG_DIR / 'errors.log',
             'maxBytes': 1024 * 1024 * 10,
             'backupCount': 5,
-            'formatter': 'detailed',
+            'formatter': 'verbose',
         },
     },
     "root": {  # всё, у чего нет своего логгера
