@@ -207,8 +207,8 @@ EMAIL_PORT = 587
 EMAIL_USE_SSL = False
 EMAIL_USE_TLS = True
 
-EMAIL_HOST_USER = env('YANDEX_EMAIL')
-EMAIL_HOST_PASSWORD = env('YANDEX_EMAIL_PASSWORD')
+EMAIL_HOST_USER = env('YANDEX_EMAIL', default='test@example.com')
+EMAIL_HOST_PASSWORD = env('YANDEX_EMAIL_PASSWORD', default='pass1234')
 
 LOG_DIR = Path(BASE_DIR) / "logs"
 os.makedirs(LOG_DIR, exist_ok=True)
@@ -297,6 +297,3 @@ if "test" in sys.argv:
     CELERY_BROKER_URL = 'memory://'
     CELERY_RESULT_BACKEND = 'cache+memory://'
     CELERY_TASK_ALWAYS_EAGER = True
-
-    EMAIL_HOST_USER = 'test@example.com'
-    EMAIL_HOST_PASSWORD = 'test-password'
