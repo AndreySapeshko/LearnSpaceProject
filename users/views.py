@@ -3,7 +3,7 @@ from rest_framework.generics import (
     RetrieveAPIView, UpdateAPIView, DestroyAPIView
 )
 from django.contrib.auth import get_user_model
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import AllowAny
 
 from users.serializers import UserSerializer
 
@@ -16,7 +16,7 @@ class UserCreateAPIView(CreateAPIView):
     permission_classes = [AllowAny]
 
     def perform_create(self, serializer):
-        user = serializer.save(is_active=True)
+        serializer.save(is_active=True)
 
 
 class UserListAPIView(ListAPIView):

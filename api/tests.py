@@ -1,11 +1,11 @@
 from rest_framework.test import APITestCase
-from django.urls import reverse
 from rest_framework import status
 from django.contrib.auth import get_user_model
 
 from courses.models import Course, Lesson
 
 User = get_user_model()
+
 
 class LessonTestCase(APITestCase):
 
@@ -56,7 +56,7 @@ class LessonTestCase(APITestCase):
             'description': 'new test description',
             'course': self.course.id
         }
-        response = self.client.put(f'/api/lesson/{self.lesson.id}/edit/',data)
+        response = self.client.put(f'/api/lesson/{self.lesson.id}/edit/', data)
 
         # print(f"Response status: {response.status_code}")
         # print(f"Response data json: {response.json()}")
