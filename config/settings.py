@@ -296,3 +296,7 @@ if "test" in sys.argv:
     }
     CELERY_BROKER_URL = 'memory://'
     CELERY_RESULT_BACKEND = 'cache+memory://'
+    CELERY_TASK_ALWAYS_EAGER = True
+
+    EMAIL_HOST_USER = 'test@example.com'
+    EMAIL_HOST_PASSWORD = 'test-password'
