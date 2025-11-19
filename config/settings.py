@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 import os
+import sys
+
 import environ
 from datetime import timedelta
 from pathlib import Path
@@ -284,3 +286,11 @@ LOGGING = {
         # },
     },
 }
+
+if "test" in sys.argv:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "test.db.sqlite3"
+        }
+    }
