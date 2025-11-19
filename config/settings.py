@@ -294,3 +294,5 @@ if "test" in sys.argv:
             "NAME": BASE_DIR / "test.db.sqlite3"
         }
     }
+    CELERY_BROKER_URL = 'memory://'
+    CELERY_RESULT_BACKEND = 'cache+memory://'

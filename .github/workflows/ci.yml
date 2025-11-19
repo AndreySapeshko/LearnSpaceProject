@@ -14,6 +14,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.13'
+          cache: 'poetry'
 
       - name: Install poetry
         run: |
@@ -38,6 +39,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.13'
+          cache: 'poetry'
 
       - name: Install poetry
         run: |
@@ -47,8 +49,11 @@ jobs:
       - name: Install dependencies
         run: poetry install --no-interaction -v
 
+      - name: Run migrations
+        run: poetry run python manage.py migrate
+
       - name: Run tests
-        run: poetry run pytest
+        run: poetry run python manage.py test --verbosity=2
 
   build:
     needs: tests
@@ -76,40 +81,6 @@ jobs:
         uses: webfactory/ssh-agent@v0.8.1
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
-
-      - name: Copy project files to server
-        run: |
-          rsync -avz --exclude '__pycache__' . ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_DIR }}
-
-      - name: Install dependencies on server
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
-            cd ${{ secrets.DEPLOY_DIR }}
-            python -m pip install --upgrade pip
-            pip install poetry
-            poetry config virtualenvs.create false
-            poetry install --no-interaction
-          EOF
-
-      - name: Apply migrations on server
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
-            cd ${{ secrets.DEPLOY_DIR }}
-            poetry run python manage.py migrate
-          EOF
-
-      - name: Collect static files on server
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
-            cd ${{ secrets.DEPLOY_DIR }}
-            poetry run python manage.py collectstatic --noinput
-          EOF
-
-      - name: Restart application
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
-            sudo systemctl restart myapp.service
-          EOF
 
       - name: Deploy to server
         run: |
