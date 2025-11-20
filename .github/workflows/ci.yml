@@ -112,6 +112,8 @@ jobs:
           STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}
           REDIS_HOST=redis
           REDIS_PORT=6379
+          YANDEX_EMAIL=andrs.1@yandex.ru
+          YANDEX_EMAIL_PASSWORD=${{ secrets.YANDEX_EMAIL_PASSWORD }}
           ENV
             echo "✅ .env file created"
             fi
