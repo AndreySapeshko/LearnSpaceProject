@@ -91,21 +91,36 @@ jobs:
       - name: Start services
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
-            echo "📁 Checking files on server..."
-            cd /home/andrs/learnspace
-            pwd
-            ls -la
+            cd /home/andrs
+            rm -rf learnspace
+            git clone -b develop https://github.com/${{ github.repository }}.git learnspace
+            cd learnspace
           
-            # Если файлов нет - клонируем вручную
-            if [ ! -f docker-compose.yml ]; then
-              echo "❌ Files not found, cloning from GitHub..."
-              cd /home/andrs
-              rm -rf learnspace
-              git clone -b develop https://github.com/${{ github.repository }}.git learnspace
-              cd learnspace
-            fi
-          
-            echo "✅ Files ready, starting services..."
-            docker compose down
-            docker compose up -d
-          EOF
+            # Создать .env файл если его нет
+            if [ ! -f .env ]; then
+              cat > .env << 'ENV'
+  SECRET_KEY=django-insecure-1nv)%vcn3+_8%2q*5nzs_^^-dotdxo2qz0eczegc3#*at%1)4x
+  DEBUG=True
+  ALLOWED_HOSTS=127.0.0.1,localhost
+  DATABASE_NAME=learn_space_project
+  DATABASE_USER=andrdd17
+  DATABASE_PASSWORD='u|D".s&qcX'
+  DATABASE_HOST=db
+  DATABASE_PORT=5432
+  STRIPE_PUBLISHABLE_KEY=pk_test_51SRRP81K8PeqjkBOXn4J9bGr7zWrJ2clwyLRVbWLMIdRrLQ4xRDVnk3vJJDrnERv1KlWzc1VvS4kgNsRwS19TN8P00SkH9AqLf
+  STRIPE_SECRET_KEY=sk_test_51SRRP81K8PeqjkBOjkXYMM6LKEZYXH50j7KA63W5XlfHO6n3k6RYfNAhL4l7ek6VQPudlKOXx02vATPEsN5ruo6H00NP1qYXZ2
+  STRIPE_WEBHOOK_SECRET=whsec_07ab77e3b8b45bebbfb54f3d600d4eabfe43a4335e9bb039bb33f2e50338aa2d
+  REDIS_HOST=redis
+  REDIS_PORT=6379
+  ENV
+        echo "✅ .env file created"
+        fi
+
+        # Обновить docker-compose.yml
+        sed -i "s|build:
+          .|image: ${{ secrets.DOCKER_HUB_USERNAME }}/learnspace:${{ github.sha }}|g" docker-compose.yml
+
+        # Запустить сервисы
+        docker compose down
+        docker compose up -d
+        EOF
