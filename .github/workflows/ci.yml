@@ -99,17 +99,17 @@ jobs:
             # Создать .env файл если его нет
             if [ ! -f .env ]; then
               cat > .env << 'ENV'
-          SECRET_KEY=django-insecure-1nv)%vcn3+_8%2q*5nzs_^^-dotdxo2qz0eczegc3#*at%1)4x
+          SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}
           DEBUG=True
           ALLOWED_HOSTS=127.0.0.1,localhost
           DATABASE_NAME=learn_space_project
           DATABASE_USER=andrdd17
-          DATABASE_PASSWORD='u|D".s&qcX'
+          DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
           DATABASE_HOST=db
           DATABASE_PORT=5432
-          STRIPE_PUBLISHABLE_KEY=pk_test_51SRRP81K8PeqjkBOXn4J9bGr7zWrJ2clwyLRVbWLMIdRrLQ4xRDVnk3vJJDrnERv1KlWzc1VvS4kgNsRwS19TN8P00SkH9AqLf
-          STRIPE_SECRET_KEY=sk_test_51SRRP81K8PeqjkBOjkXYMM6LKEZYXH50j7KA63W5XlfHO6n3k6RYfNAhL4l7ek6VQPudlKOXx02vATPEsN5ruo6H00NP1qYXZ2
-          STRIPE_WEBHOOK_SECRET=whsec_07ab77e3b8b45bebbfb54f3d600d4eabfe43a4335e9bb039bb33f2e50338aa2d
+          STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLISHABLE_KEY }}
+          STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
+          STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}
           REDIS_HOST=redis
           REDIS_PORT=6379
           ENV
