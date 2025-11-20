@@ -94,7 +94,14 @@ jobs:
             cd /home/andrs
             sudo chown -R andrs:andrs learnspace 2>/dev/null || true
             rm -rf learnspace 2>/dev/null || true
-            git clone -b develop https://github.com/${{ github.repository }}.git learnspace
+          
+            if [ -d "learnspace" ]; then
+              cd learnspace
+              git checkout feature/home_worke_35_2    # просто переключаем ветку
+              git pull origin feature/home_worke_35_2 # забираем изменения
+            else
+              git clone -b feature/home_worke_35_2 https://github.com/${{ github.repository }}.git learnspace
+            fi
             cd learnspace
           
             # Создать .env файл если его нет
