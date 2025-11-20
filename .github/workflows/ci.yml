@@ -94,7 +94,7 @@ jobs:
           --include='server/***' \        # ← и всё внутри нее
           --include='.env.production' \
           --exclude='*' \
-          ./${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:/home/andrs/learnspace/
+          $GITHUB_WORKSPACE/ ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:/home/andrs/learnspace/
 
       - name: Start services
         run: |
