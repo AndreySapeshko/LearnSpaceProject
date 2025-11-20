@@ -115,8 +115,10 @@ jobs:
           ENV
             echo "✅ .env file created"
             fi
+          
+          sed -i "s|build: .|image: ${{ secrets.DOCKER_HUB_USERNAME }}/learnspace:${{ github.sha }}|g" docker-compose.yml
 
           # Запустить сервисы
           docker compose down
-          ocker compose up -d
+          docker compose up -d
           EOF
