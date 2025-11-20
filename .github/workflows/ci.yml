@@ -92,7 +92,7 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
             cd /home/andrs
-            rm -rf learnspace
+            rm -rf learnspace 2>/dev/null || true
             git clone -b develop https://github.com/${{ github.repository }}.git learnspace
             cd learnspace
           
@@ -120,7 +120,6 @@ jobs:
           
           sed -i "s|build: .|image: ${{ secrets.DOCKER_HUB_USERNAME }}/learnspace:${{ github.sha }}|g" docker-compose.yml
 
-          # Запустить сервисы
           docker compose down
           docker compose up -d
           EOF
