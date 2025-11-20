@@ -1,7 +1,7 @@
 from django.contrib.auth.models import Group, Permission
-from courses.models import Course, Lesson
 
-def create_or_update_group(group_name: str, permission_codenames: list)-> None:
+
+def create_or_update_group(group_name: str, permission_codenames: list) -> None:
     """ Создает группу пользователей и добавляет ей разрешения,
     если такая группа есть то добавляет ей разрешения если их там нет """
 

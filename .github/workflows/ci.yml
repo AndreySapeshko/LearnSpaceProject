@@ -1,0 +1,121 @@
+name: Django CI
+
+on: [ push, pull_request ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+
+      - name: Install poetry
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+
+      - name: Install dependencies
+        run: poetry install --no-interaction -v
+
+      - name: Run flake8
+        run: poetry run flake8
+
+  tests:
+    needs: lint
+    runs-on: ubuntu-latest
+    env:
+      DJANGO_TEST: "1"
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+
+      - name: Install poetry
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+
+      - name: Install dependencies
+        run: poetry install --no-interaction -v
+
+      - name: Set test database for CI
+        run: echo "DJANGO_TEST=1" >> $GITHUB_ENV
+
+      - name: Run migrations
+        run: poetry run python manage.py migrate
+
+      - name: Run tests
+        run: poetry run python manage.py test --verbosity=2
+
+  build:
+    needs: tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Log in to Docker Hub
+        run: echo ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }} | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
+
+      - name: Build Docker image
+        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/learnspace:${{ github.sha }} .
+
+      - name: Push Docker image to Docker Hub
+        run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/learnspace:${{ github.sha }}
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+
+      - name: Deploy via Git clone
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+            cd /home/andrs
+
+            # Клонировать проект
+            git clone -b develop https://github.com/${{ github.repository }}.git learnspace
+            cd learnspace
+          
+            # Создать .env файл если его нет
+            if [ ! -f .env ]; then
+              cat > .env << 'ENV'
+          SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}
+          DEBUG=True
+          ALLOWED_HOSTS=127.0.0.1,localhost
+          DATABASE_NAME=learn_space_project
+          DATABASE_USER=andrdd17
+          DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}
+          DATABASE_HOST=db
+          DATABASE_PORT=5432
+          STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLISHABLE_KEY }}
+          STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
+          STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}
+          REDIS_HOST=redis
+          REDIS_PORT=6379
+          YANDEX_EMAIL=andrs.1@yandex.ru
+          YANDEX_EMAIL_PASSWORD=${{ secrets.YANDEX_EMAIL_PASSWORD }}
+          ENV
+            echo "✅ .env file created"
+            fi
+
+          docker compose down
+          docker compose up -d
+          EOF

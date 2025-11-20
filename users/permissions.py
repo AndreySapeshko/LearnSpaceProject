@@ -1,6 +1,6 @@
 from rest_framework.permissions import BasePermission
 
-from courses.models import Course, Lesson
+from courses.models import Course
 
 
 class IsModerator(BasePermission):

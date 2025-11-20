@@ -1,5 +1,4 @@
 from django.core.management.base import BaseCommand
-from courses.models import Course, Lesson
 from users.groups import create_or_update_group
 
 
@@ -16,4 +15,3 @@ class Command(BaseCommand):
         group_name = 'Moderators'
 
         create_or_update_group(group_name, codenames)
-

@@ -9,7 +9,7 @@ class Command(BaseCommand):
         users = [
             {
                 'email': 'user_four4@example.com', 'password': 'user_four4',
-                'phone_number':'456123789', 'country': 'Russia'
+                'phone_number': '456123789', 'country': 'Russia'
             },
             {
                 'email': 'user_five5@example.com', 'password': 'user_five5',
