@@ -86,15 +86,7 @@ jobs:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
       - name: Deploy files via rsync
-        run: |
-          rsync -avz -e "ssh -o StrictHostKeyChecking=no" \
-          --include='docker-compose.yml' \
-          --include='Dockerfile' \
-          --include='server/' \           # ← включить папку server
-          --include='server/***' \        # ← и всё внутри нее
-          --include='.env.production' \
-          --exclude='*' \
-          $GITHUB_WORKSPACE/ ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:/home/andrs/learnspace/
+        run: rsync -avz -e "ssh -o StrictHostKeyChecking=no" --include='docker-compose.yml' --include='Dockerfile' --include='server/' --include='server/***' --include='.env' --exclude='*' ./ ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:/home/andrs/learnspace/
 
       - name: Start services
         run: |
