@@ -92,6 +92,7 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
             cd /home/andrs
+            sudo chown -R andrs:andrs learnspace 2>/dev/null || true
             rm -rf learnspace 2>/dev/null || true
             git clone -b develop https://github.com/${{ github.repository }}.git learnspace
             cd learnspace
