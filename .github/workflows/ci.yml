@@ -85,11 +85,31 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
-      - name: Deploy to server
+      - name: Deploy files via rsync
+        run: |
+          rsync -avz -e "ssh -o StrictHostKeyChecking=no" \
+          --include='docker-compose.yml' \
+          --include='Dockerfile' \
+          --include='server/' \           # ← включить папку server
+          --include='server/***' \        # ← и всё внутри нее
+          --include='.env.production' \
+          --exclude='*' \
+          ./ ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:/home/andrs/learnspace/
+
+      - name: Start services
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
-          docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/learnspace:${{ github.sha }}
-          docker stop learnspace || true
-          docker rm learnspace || true
-          docker run -d --name learnspace -p 80:8000 ${{ secrets.DOCKER_HUB_USERNAME }}/learnspace:${{ github.sha }}
+            cd /home/andrs/learnspace
+            
+            # Создать .env если нет
+            if [ ! -f .env ]; then
+              cp .env.production .env
+            fi
+            
+            # Обновить docker-compose с новым образом
+            sed -i "s|image:.*/learnspace:.*|image: ${{ secrets.DOCKER_HUB_USERNAME }}/learnspace:${{ github.sha }}|g" docker-compose.yml
+            
+            # Запустить
+            docker compose down
+            docker compose up -d --build
           EOF
