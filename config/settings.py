@@ -8,18 +8,6 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-if "test" in sys.argv or os.environ.get("DJANGO_TEST") == "1":
-    print("⚠️ Using SQLite for CI tests")
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "test.db.sqlite3"
-        }
-    }
-    CELERY_BROKER_URL = 'memory://'
-    CELERY_RESULT_BACKEND = 'cache+memory://'
-    CELERY_TASK_ALWAYS_EAGER = True
-
 env = environ.Env()
 env.read_env(os.path.join(BASE_DIR, '.env'))
 
@@ -286,3 +274,15 @@ LOGGING = {
         # },
     },
 }
+
+if "test" in sys.argv or os.environ.get("DJANGO_TEST") == "1":
+    print("⚠️ Using SQLite for CI tests")
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "test.db.sqlite3"
+        }
+    }
+    CELERY_BROKER_URL = 'memory://'
+    CELERY_RESULT_BACKEND = 'cache+memory://'
+    CELERY_TASK_ALWAYS_EAGER = True
