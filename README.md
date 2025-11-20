@@ -325,3 +325,290 @@ For issues and questions:
 ---
 
 **Note**: This project uses Docker Compose for container orchestration and Poetry for dependency management. Choose the development approach that best fits your needs.
+
+
+Отличная идея! Вот готовый вариант раздела для вашего README:
+
+# Deploy Instructions
+
+## Server Setup
+
+### 1. Create Virtual Machine
+
+1. Go to [Yandex Cloud Console](https://console.cloud.yandex.ru/)
+2. Create a new VM instance:
+   - **Image**: Ubuntu 22.04 LTS
+   - **Platform**: Intel Ice Lake
+   - **Resources**: 2 vCPU, 2 GB RAM (minimum)
+   - **Disk**: 20 GB SSD
+3. Configure network:
+   - Open ports: 22 (SSH), 80 (HTTP), 443 (HTTPS)
+4. Add SSH public key for authentication
+
+### 2. Server Initial Setup
+
+Connect to your server and perform initial setup:
+
+```bash
+ssh ubuntu@your-server-ip
+
+# Update system
+sudo apt update && sudo apt upgrade -y
+
+# Install Docker
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+sudo usermod -aG docker $USER
+
+# Install Docker Compose
+sudo apt install docker-compose-plugin
+
+# Logout and login again to apply group changes
+exit
+ssh ubuntu@your-server-ip
+```
+
+### 3. Project Deployment
+
+```bash
+# Clone project
+cd /home/ubuntu
+git clone https://github.com/your-username/LearnSpaceProject.git learnspace
+cd learnspace
+
+# Create environment file
+cat > .env << 'EOF'
+DEBUG=False
+SECRET_KEY=your-secret-key-here
+DATABASE_NAME=learnspace
+DATABASE_USER=learnspace_user
+DATABASE_PASSWORD=your-secure-password
+DATABASE_HOST=db
+DATABASE_PORT=5432
+REDIS_HOST=redis
+REDIS_PORT=6379
+STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLISHABLE_KEY }}
+STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
+STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}
+YANDEX_EMAIL=example@yandex.ru
+YANDEX_EMAIL_PASSWORD=${{ secrets.YANDEX_EMAIL_PASSWORD }}
+EOF
+
+# Start services
+docker compose up -d
+```
+
+## GitHub Actions Auto-Deploy
+
+### 1. Repository Secrets
+
+Add these secrets in your GitHub repository settings (`Settings → Secrets and variables → Actions`):
+
+- `SERVER_IP` - your server IP address
+- `SSH_USER` - server username (usually `ubuntu`)
+- `SSH_KEY` - private SSH key for server access
+- `DOCKER_HUB_USERNAME` - your Docker Hub username
+- `DOCKER_HUB_ACCESS_TOKEN` - Docker Hub access token
+- `DJANGO_SECRET_KEY` - Django secret key for production
+- `DATABASE_PASSWORD` - PostgreSQL password
+- `STRIPE_PUBLISHABLE_KEY`
+- `STRIPE_SECRET_KEY`
+- `STRIPE_WEBHOOK_SECRET`
+- `YANDEX_EMAIL_PASSWOR`
+
+### 2. Docker Hub Setup
+
+1. Create account on [Docker Hub](https://hub.docker.com/)
+2. Generate access token in Account Settings → Security
+3. Create repository `learnspace`
+
+### 3. Deployment Process
+
+The project uses GitHub Actions for CI/CD:
+
+1. **On push to main branch**:
+   - Run tests
+   - Build Docker image
+   - Push to Docker Hub
+   - Deploy to server
+
+2. **Manual deployment**:
+   - Go to Actions tab
+   - Select "Deploy" workflow
+   - Click "Run workflow"
+
+## Manual Deployment Commands
+
+```bash
+# Connect to server
+ssh ubuntu@your-server-ip
+
+# Navigate to project
+cd /home/ubuntu/learnspace
+
+# Pull latest changes
+git pull origin main
+
+# Restart services
+docker compose down
+docker compose pull
+docker compose up -d
+
+# Check status
+docker compose ps
+
+# View logs
+docker compose logs -f web
+```
+
+## Environment Configuration
+
+### Required Environment Variables
+
+Create `.env` file on server:
+
+```env
+# Django
+DEBUG=False
+SECRET_KEY=your-production-secret-key
+
+# Database
+DATABASE_NAME=learnspace
+DATABASE_USER=learnspace_user
+DATABASE_PASSWORD=secure-password
+DATABASE_HOST=db
+DATABASE_PORT=5432
+
+# Redis
+REDIS_HOST=redis
+REDIS_PORT=6379
+
+# Celery
+CELERY_BROKER_URL=redis://redis:6379/0
+```
+
+### Optional Variables
+
+```env
+# Email (for production)
+EMAIL_HOST=smtp.yandex.ru
+EMAIL_PORT=587
+EMAIL_HOST_USER=your-email@yandex.ru
+EMAIL_HOST_PASSWORD=your-email-password
+EMAIL_USE_TLS=True
+
+# Stripe (for payments)
+STRIPE_PUBLIC_KEY=pk_test_...
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=weghook_...
+```
+
+## Service Management
+
+### Common Docker Commands
+
+```bash
+# Start all services
+docker compose up -d
+
+# Stop all services
+docker compose down
+
+# View logs
+docker compose logs -f
+docker compose logs -f web
+docker compose logs -f nginx
+
+# Check status
+docker compose ps
+
+# Restart specific service
+docker compose restart web
+
+# Run management commands
+docker compose exec web python manage.py migrate
+docker compose exec web python manage.py collectstatic
+```
+
+### Database Management
+
+```bash
+# Create backup
+docker compose exec db pg_dump -U learnspace_user learnspace > backup.sql
+
+# Restore backup
+cat backup.sql | docker compose exec -T db psql -U learnspace_user learnspace
+
+# Access database console
+docker compose exec db psql -U learnspace_user -d learnspace
+```
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Port 80 already in use**:
+   ```bash
+   sudo netstat -tulpn | grep :80
+   sudo systemctl stop apache2  # if Apache is running
+   ```
+
+2. **Docker permission denied**:
+   ```bash
+   sudo usermod -aG docker $USER
+   newgrp docker
+   ```
+
+3. **Database connection issues**:
+   ```bash
+   docker compose logs db
+   docker compose exec db pg_isready -U learnspace_user -d learnspace
+   ```
+
+4. **Static files not loading**:
+   ```bash
+   docker compose exec web python manage.py collectstatic --noinput
+   ```
+
+### Monitoring
+
+```bash
+# Check disk space
+df -h
+
+# Check memory usage
+free -h
+
+# Check running processes
+htop
+
+# Check service status
+systemctl status docker
+docker system df
+```
+
+## Security Recommendations
+
+1. **Firewall configuration**:
+   ```bash
+   sudo ufw enable
+   sudo ufw allow 22
+   sudo ufw allow 80
+   sudo ufw allow 443
+   ```
+
+2. **Regular updates**:
+   ```bash
+   sudo apt update && sudo apt upgrade -y
+   ```
+
+3. **Backup strategy**:
+   - Regular database backups
+   - Monitor disk space
+   - Set up log rotation
+
+---
+
+**Note**: Replace placeholder values (like `your-server-ip`, `your-secret-key-here`) with your actual configuration values.
+
+Этот раздел покрывает все основные аспекты настройки сервера и деплоя! 🚀
