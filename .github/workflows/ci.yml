@@ -94,11 +94,6 @@ jobs:
             git checkout feature/home_worke_35_2
             git pull origin feature/home_worke_35_2
       
-            # Заменяем build на образ
-            sed -i "/web:/,/^  [a-z]/ s|build: \.|image: ${{ secrets.DOCKER_HUB_USERNAME }}/learnspace:${{ github.sha }}|g" docker-compose.yml
-            sed -i "/celery:/,/^  [a-z]/ s|build: \.|image: ${{ secrets.DOCKER_HUB_USERNAME }}/learnspace:${{ github.sha }}|g" docker-compose.yml
-            sed -i "/celery-beat:/,/^  [a-z]/ s|build: \.|image: ${{ secrets.DOCKER_HUB_USERNAME }}/learnspace:${{ github.sha }}|g" docker-compose.yml
-          
             # Создать .env файл если его нет
             if [ ! -f .env ]; then
               cat > .env << 'ENV'
