@@ -91,18 +91,13 @@ jobs:
       - name: Start services
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
-            cd /home/andrs
-            sudo chown -R andrs:andrs learnspace 2>/dev/null || true
-            rm -rf learnspace 2>/dev/null || true
-          
-            if [ -d "learnspace" ]; then
-              cd learnspace
-              git checkout feature/home_worke_35_2    # просто переключаем ветку
-              git pull origin feature/home_worke_35_2 # забираем изменения
-            else
-              git clone -b feature/home_worke_35_2 https://github.com/${{ github.repository }}.git learnspace
-            fi
-            cd learnspace
+            git checkout feature/home_worke_35_2
+            git pull origin feature/home_worke_35_2
+      
+            # Заменяем build на образ
+            sed -i "/web:/,/^  [a-z]/ s|build: \.|image: ${{ secrets.DOCKER_HUB_USERNAME }}/learnspace:${{ github.sha }}|g" docker-compose.yml
+            sed -i "/celery:/,/^  [a-z]/ s|build: \.|image: ${{ secrets.DOCKER_HUB_USERNAME }}/learnspace:${{ github.sha }}|g" docker-compose.yml
+            sed -i "/celery-beat:/,/^  [a-z]/ s|build: \.|image: ${{ secrets.DOCKER_HUB_USERNAME }}/learnspace:${{ github.sha }}|g" docker-compose.yml
           
             # Создать .env файл если его нет
             if [ ! -f .env ]; then
@@ -127,5 +122,6 @@ jobs:
             fi
 
           docker compose down
+          docker compose pull
           docker compose up -d
           EOF
