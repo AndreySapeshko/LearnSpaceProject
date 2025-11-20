@@ -85,15 +85,15 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
-      - name: Deploy files via rsync
-        run: rsync -avz -e "ssh -o StrictHostKeyChecking=no" --include='docker-compose.yml' --include='Dockerfile' --include='server/' --include='server/***' --include='.env' --exclude='*' ./ ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:/home/andrs/learnspace/
-
-      - name: Start services
+      - name: Deploy via Git clone
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
-            git checkout feature/home_worke_35_2
-            git pull origin feature/home_worke_35_2
-      
+            cd /home/andrs
+
+            # Клонировать проект
+            git clone -b develop https://github.com/${{ github.repository }}.git learnspace
+            cd learnspace
+          
             # Создать .env файл если его нет
             if [ ! -f .env ]; then
               cat > .env << 'ENV'
