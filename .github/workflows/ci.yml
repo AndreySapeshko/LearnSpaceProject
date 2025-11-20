@@ -91,17 +91,21 @@ jobs:
       - name: Start services
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+            echo "📁 Checking files on server..."
             cd /home/andrs/learnspace
-            
-            # Создать .env если нет
-            if [ ! -f .env ]; then
-              cp .env.production .env
+            pwd
+            ls -la
+          
+            # Если файлов нет - клонируем вручную
+            if [ ! -f docker-compose.yml ]; then
+              echo "❌ Files not found, cloning from GitHub..."
+              cd /home/andrs
+              rm -rf learnspace
+              git clone -b develop https://github.com/${{ github.repository }}.git learnspace
+              cd learnspace
             fi
-            
-            # Обновить docker-compose с новым образом
-            sed -i "s|image:.*/learnspace:.*|image: ${{ secrets.DOCKER_HUB_USERNAME }}/learnspace:${{ github.sha }}|g" docker-compose.yml
-            
-            # Запустить
+          
+            echo "✅ Files ready, starting services..."
             docker compose down
-            docker compose up -d --build
+            docker compose up -d
           EOF
