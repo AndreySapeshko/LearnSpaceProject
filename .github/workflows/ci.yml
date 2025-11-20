@@ -88,8 +88,8 @@ jobs:
       - name: Deploy to server
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
-          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/learnspace:${{ github.sha }}
+          docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/learnspace:${{ github.sha }}
           docker stop learnspace || true
           docker rm learnspace || true
-          docket run -d --name learnspace -p 80:8000 ${{ secrets.DOCKER_HUB_USERNAME }}/learnspace:${{ github.sha }}
+          docker run -d --name learnspace -p 80:8000 ${{ secrets.DOCKER_HUB_USERNAME }}/learnspace:${{ github.sha }}
           EOF
